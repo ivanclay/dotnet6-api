@@ -17,9 +17,16 @@ app.MapPost("/products", (ProductRequest productRequest, ApplicationDbContext co
         Category = category,
         CategoryId = productRequest.CategoryId,
         Description = productRequest.Description,
-        //Id = productRequest.Id
-        //Tags = productRequest.Tags
     };
+
+    if(productRequest.Tags != null)
+    {
+        product.Tags = new List<Tag>();
+        foreach (var item in productRequest.Tags)
+        {
+            product.Tags.Add(new Tag { Name = item });            
+        }
+    }
 
     context.Products.Add(product);
     context.SaveChanges();
