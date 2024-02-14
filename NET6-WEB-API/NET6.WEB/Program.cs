@@ -7,9 +7,24 @@ var app = builder.Build();
 var configuration = app.Configuration;
 ProductRepository.Init(configuration);
 
-app.MapPost("/products", (Product product) => {
-    ProductRepository.Add(product);
-    return Results.Created($"/products/{product.Code}", product.Code);
+app.MapPost("/products", (ProductRequest productRequest, ApplicationDbContext context) => {
+
+    var category = context.Categories.FirstOrDefault(x => x.Id == productRequest.CategoryId);
+    var product = new Product 
+    {
+        Code = productRequest.Code,
+        Name = productRequest.Name,
+        Category = category,
+        CategoryId = productRequest.CategoryId,
+        Description = productRequest.Description,
+        //Id = productRequest.Id
+        //Tags = productRequest.Tags
+    };
+
+    context.Products.Add(product);
+    context.SaveChanges();
+
+    return Results.Created($"/products/{product.Id}", product.Id);
 });
 
 app.MapGet("/products/{code}", ([FromRoute] string code) => {

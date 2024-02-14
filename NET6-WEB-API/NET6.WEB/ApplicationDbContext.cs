@@ -7,6 +7,7 @@ public class ApplicationDbContext : DbContext
         
     }
     public DbSet<Product> Products { get; set; }
+    public DbSet<Category> Categories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -16,6 +17,8 @@ public class ApplicationDbContext : DbContext
             .Property(x => x.Name).HasMaxLength(120).IsRequired();
         modelBuilder.Entity<Product>()
             .Property(x => x.Code).HasMaxLength(20).IsRequired(false);
+        modelBuilder.Entity<Category>()
+            .ToTable("Categories");
     }
 
     //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) 

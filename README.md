@@ -1,4 +1,4 @@
-# Dotnet 7 API
+# Dotnet 7 API (Updated)
 
 ## Install dotnet EF CLI
 dotnet tool install --global dotnet-ef
