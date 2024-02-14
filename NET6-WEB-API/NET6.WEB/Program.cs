@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSqlServer<ApplicationDbContext>(builder.Configuration["Database:SqlServerConnection"]);
@@ -34,13 +35,19 @@ app.MapPost("/products", (ProductRequest productRequest, ApplicationDbContext co
     return Results.Created($"/products/{product.Id}", product.Id);
 });
 
-app.MapGet("/products/{code}", ([FromRoute] string code) => {
-    var savedProduct = ProductRepository.GetBy(code);
-    if(savedProduct != null) 
+app.MapGet("/products/{id}", ([FromRoute] int id, ApplicationDbContext context) => {
+
+    var savedProduct = context
+        .Products
+        .Include(x => x.Category)
+        .Include(x => x.Tags)
+        .FirstOrDefault(x => x.Id == id);
+
+    if (savedProduct != null) 
     {
-        Console.WriteLine("Product found");
+        return Results.Ok(savedProduct);
     }
-    return savedProduct;
+    return Results.NotFound();
 });
 
 app.MapPut("/products", (Product product) => {
