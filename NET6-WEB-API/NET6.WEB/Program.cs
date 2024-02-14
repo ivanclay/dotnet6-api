@@ -50,9 +50,29 @@ app.MapGet("/products/{id}", ([FromRoute] int id, ApplicationDbContext context) 
     return Results.NotFound();
 });
 
-app.MapPut("/products", (Product product) => {
-    var savedProduct = ProductRepository.GetBy(product.Code);
-    savedProduct.Name = product.Name;
+app.MapPut("/products/{id}", ([FromRoute] int id, ProductRequest productRequest, ApplicationDbContext context) => {
+    var savedProduct = context
+        .Products
+        .Include(x => x.Tags)
+        .FirstOrDefault(x => x.Id == id);
+
+    var category = context.Categories.FirstOrDefault(x => x.Id == productRequest.CategoryId);
+
+    savedProduct.Code = productRequest.Code;
+    savedProduct.Name = productRequest.Name;
+    savedProduct.Description = productRequest.Description;
+    savedProduct.Category = category;
+
+    if (productRequest.Tags != null)
+    {
+        savedProduct.Tags = new List<Tag>();
+        foreach (var item in productRequest.Tags)
+        {
+            savedProduct.Tags.Add(new Tag { Name = item });
+        }
+    }
+
+    context.SaveChanges();
     return Results.Ok();
 });
 
